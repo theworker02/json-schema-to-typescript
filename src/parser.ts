@@ -29,6 +29,11 @@ export type UsedNames = Set<string>
  */
 const equivalentNamedTypes = new WeakMap<Processed, Map<string, Map<SchemaType, AST>>>()
 
+// Structural de-duplication is an optimisation for small, repeated inline
+// declarations. Walking large real-world schemas just to construct a cache key
+// costs more memory than it can save (notably while compiling the corpus).
+const maxEquivalentNamedTypeNodes = 128
+
 export function parse(
   schema: NormalizedJSONSchema | JSONSchema4Type,
   options: Options,
@@ -303,9 +308,16 @@ function equivalentNamedTypeKey(schema: NormalizedJSONSchema, type: SchemaType, 
 
   const ancestors = new Set<object>()
   let recursive = false
+  let tooLarge = false
+  let nodeCount = 0
   const copy = (value: unknown): unknown => {
     if (!value || typeof value !== 'object') {
       return value
+    }
+    nodeCount += 1
+    if (nodeCount > maxEquivalentNamedTypeNodes) {
+      tooLarge = true
+      return undefined
     }
     if (ancestors.has(value)) {
       recursive = true
@@ -324,7 +336,7 @@ function equivalentNamedTypeKey(schema: NormalizedJSONSchema, type: SchemaType, 
   }
 
   const serialized = JSON.stringify(copy(schema))
-  return recursive ? undefined : `${type}:${serialized}`
+  return recursive || tooLarge ? undefined : `${type}:${serialized}`
 }
 
 function parseBooleanSchema(schema: boolean, keyName: string | undefined, options: Options): AST {
