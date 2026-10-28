@@ -302,7 +302,7 @@ function parseAsTypeWithCache(
 function equivalentNamedTypeKey(schema: NormalizedJSONSchema, type: SchemaType, options: Options): string | undefined {
   // Imported schemas belong to their source modules, and a custom name callback
   // may intentionally distinguish otherwise identical schema objects.
-  if (!isNamed(schema, options) || schema[Source] || options.customName) {
+  if (!options.dedupeIdenticalTitledSchemas || !isNamed(schema, options) || schema[Source] || options.customName) {
     return undefined
   }
 
