@@ -45,6 +45,11 @@ export interface Options {
    */
   customName?: (schema: LinkedJSONSchema, keyNameFromDefinition: string | undefined) => string | undefined
   /**
+   * Reuse identical titled inline schemas as one declaration. Opt in to preserve
+   * existing generated names and type shapes for established consumers.
+   */
+  dedupeIdenticalTitledSchemas: boolean
+  /**
    * Root directory for resolving [`$ref`](https://tools.ietf.org/id/draft-pbryan-zyp-json-ref-03.html)s.
    */
   cwd: string
@@ -139,6 +144,7 @@ export const DEFAULT_OPTIONS: Options = {
   cwd: process.cwd(),
   declarationStyle: 'interface',
   declareExternallyReferenced: true,
+  dedupeIdenticalTitledSchemas: false,
   enableConstEnums: true,
   inferStringEnumKeysFromValues: false,
   format: true,
