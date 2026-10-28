@@ -25,3 +25,6 @@ export const input = {
   },
   required: ['p1', 'p2', 'distinctPoint'],
 }
+
+// Keep the legacy output stable unless callers explicitly request structural deduplication.
+export const options = {dedupeIdenticalTitledSchemas: true}
